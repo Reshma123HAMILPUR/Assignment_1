@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard — Care & Share</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        :root {
+          --primary-color: #00A0E3; /* Mercedes blue */
+          --secondary-color: #000000; /* Black for contrast */
+          --accent-color: #E6F7FF; /* Light blue accent */
+          --bg-light: #f8fafc;
+          --text-dark: #1E293B;
+          --card-shadow: rgba(0,0,0,0.05);
+        }
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: #fff;
+          color: var(--text-dark);
+          padding-top: 80px;
+          transition: all 0.3s ease;
+        }
+        body.fullscreen-available {
+          padding-top: 0;
+        }
+        .navbar-custom {
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          position: fixed;
+          width: 100%;
+          z-index: 1050;
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+          border-bottom: 1px solid #e9ecef;
+        }
+        .navbar-brand {
+          font-weight: 700;
+          color: var(--primary-color);
+          font-size: 1.6rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+        }
+        .navbar-brand:hover {
+          color: var(--primary-color);
+        }
+        .nav-link {
+          color: var(--text-dark) !important;
+          font-weight: 500;
+          margin-left: 1rem;
+          cursor: pointer;
+          position: relative;
+          transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+          color: var(--primary-color) !important;
+        }
+        .nav-link::after {
+          content: '';
+          position: absolute;
+          width: 0;
+          height: 2px;
+          bottom: 0;
+          left: 0;
+          background-color: var(--primary-color);
+          transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+          width: 100%;
+        }
+        .dropdown-menu {
+          border: none;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          border-radius: 0;
+          border-top: 3px solid var(--primary-color);
+        }
+        .dropdown-item {
+          padding: 10px 16px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+        .dropdown-item:hover {
+          background-color: var(--primary-color);
+          color: white;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-header {
+          background: linear-gradient(135deg, var(--primary-color), #0078b5);
+          color: white;
+          padding: 80px 0;
+          margin-bottom: 40px;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+        .fullscreen-available .dashboard-header {
+          display: none;
+        }
+        .dashboard-header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: url('https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+          opacity: 0.1;
+          z-index: 0;
+        }
+        .dashboard-header .container {
+          position: relative;
+          z-index: 1;
+        }
+        .stats-card {
+          background: white;
+          border-radius: 0;
+          padding: 30px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+          text-align: center;
+          margin-bottom: 30px;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          border-top: 3px solid var(--primary-color);
+          position: relative;
+          overflow: hidden;
+        }
+        .stats-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 0;
+          background: var(--accent-color);
+          transition: height 0.3s ease;
+          z-index: 0;
+        }
+        .stats-card:hover::before {
+          height: 100%;
+        }
+        .stats-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        .stats-icon {
+          font-size: 3rem;
+          color: var(--primary-color);
+          margin-bottom: 15px;
+          position: relative;
+          z-index: 1;
+        }
+        .stats-number {
+          font-size: 2.5rem;
+          font-weight: bold;
+          color: var(--text-dark);
+          margin-bottom: 10px;
+          position: relative;
+          z-index: 1;
+        }
+        .stats-label {
+          color: #666;
+          font-size: 1.1rem;
+          position: relative;
+          z-index: 1;
+        }
+        .profile-section {
+          background: white;
+          border-radius: 0;
+          padding: 40px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+          margin-bottom: 40px;
+          border-top: 3px solid var(--primary-color);
+          position: relative;
+        }
+        .profile-section::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 0;
+          background: var(--accent-color);
+          transition: height 0.3s ease;
+          z-index: 0;
+        }
+        .profile-section:hover::before {
+          height: 100%;
+        }
+        .profile-header {
+          text-align: center;
+          margin-bottom: 30px;
+          position: relative;
+          z-index: 1;
+        }
+        .profile-avatar {
+          width: 120px;
+          height: 120px;
+          background: linear-gradient(135deg, var(--primary-color), #0078b5);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 20px;
+          font-size: 3rem;
+          color: white;
+          border: 3px solid white;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .profile-info {
+          margin-bottom: 25px;
+          position: relative;
+          z-index: 1;
+        }
+        .info-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 12px 0;
+          border-bottom: 1px solid #eee;
+          transition: background-color 0.3s ease;
+        }
+        .info-item:hover {
+          background-color: rgba(0, 160, 227, 0.05);
+        }
+        .info-label {
+          font-weight: 600;
+          color: #555;
+        }
+        .info-value {
+          color: var(--text-dark);
+          font-weight: 500;
+        }
+
+        /* Product image styles */
+        .product-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 0;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .product-image:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-color);
+        }
+        .image-placeholder {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 0.7rem;
+            border: 2px dashed #dee2e6;
+            text-align: center;
+            padding: 5px;
+        }
+
+        /* Amazon-style footer */
+        .amazon-footer {
+          background-color: #1a1a1a;
+          color: white;
+          padding: 60px 0 40px;
+          transition: all 0.3s ease;
+        }
+        .fullscreen-available .amazon-footer,
+        .fullscreen-available footer {
+          display: none;
+        }
+        .amazon-footer h5 {
+          margin-bottom: 20px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-size: 1.1rem;
+        }
+        .amazon-footer ul {
+          list-style: none;
+          padding: 0;
+        }
+        .amazon-footer ul li {
+          margin-bottom: 10px;
+        }
+        .amazon-footer ul li a {
+          color: #ccc;
+          text-decoration: none;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+        .amazon-footer ul li a:hover {
+          color: white;
+          text-decoration: none;
+        }
+        footer {
+          background: var(--secondary-color);
+          color: white;
+          padding: 25px 0;
+          transition: all 0.3s ease;
+        }
+        footer a {
+          color: white;
+          margin: 0 10px;
+          font-size: 1.2rem;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+        footer a:hover {
+          color: var(--primary-color);
+          text-decoration: none;
+        }
+        footer .social-icons {
+          margin-top: 10px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+          margin-bottom: 40px;
+        }
+        .action-btn {
+          background: white;
+          border: 2px solid var(--primary-color);
+          color: var(--primary-color);
+          padding: 15px 25px;
+          border-radius: 0;
+          text-decoration: none;
+          display: block;
+          text-align: center;
+          transition: all 0.3s ease;
+          margin-bottom: 15px;
+          cursor: pointer;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+          position: relative;
+          overflow: hidden;
+        }
+        .action-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: var(--primary-color);
+          transition: left 0.3s ease;
+          z-index: 0;
+        }
+        .action-btn:hover::before {
+          left: 0;
+        }
+        .action-btn:hover {
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .action-btn span {
+          position: relative;
+          z-index: 1;
+        }
+
+        /* Active nav link */
+        .nav-link.active {
+          color: var(--primary-color) !important;
+          font-weight: 600;
+        }
+        .nav-link.active::after {
+          width: 100%;
+        }
+
+        /* Section styles for dashboard navigation */
+        .dashboard-section {
+            display: none;
+        }
+        .dashboard-section.active {
+            display: block;
+        }
+
+        /* Fullscreen Available Items */
+        .fullscreen-available-items {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: white;
+            z-index: 1040;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .fullscreen-available-items.active {
+            display: flex;
+        }
+        .fullscreen-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+        }
+        .fullscreen-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fullscreen-title {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .close-fullscreen {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+        .close-fullscreen:hover {
+            background: white;
+            color: var(--primary-color);
+            transform: rotate(90deg);
+        }
+        .fullscreen-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 0;
+            background: #f8f9fa;
+        }
+
+        /* Admin badge */
+        .admin-badge {
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 0;
+            font-size: 0.7rem;
+            margin-left: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Card headers */
+        .card {
+            border: none;
+            border-radius: 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-top: 3px solid var(--primary-color);
+        }
+        .card-header {
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            padding: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dark);
+        }
+
+        /* Form controls */
+        .form-control, .form-select {
+            border-radius: 0;
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 160, 227, 0.2);
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 0;
+            padding: 12px 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Badges */
+        .badge {
+            border-radius: 0;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Alert styling */
+        .alert {
+            border-radius: 0;
+            border: none;
+            border-left: 4px solid;
+        }
+        .alert-info {
+            background: rgba(0, 160, 227, 0.1);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dark);
+        }
+        h2 {
+            position: relative;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        /* Available Items Styles */
+        .product-card {
+            transition: all 0.3s ease;
+            border-top: 3px solid var(--primary-color);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .product-card .card-img-top {
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+
+        /* Filter section styles */
+        .filter-section {
+            background: white;
+            border-radius: 0;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        /* Fullscreen specific styles */
+        .fullscreen-filters {
+            background: white;
+            padding: 25px 0;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+        .fullscreen-filters .row {
+            align-items: center;
+        }
+        .fullscreen-stats {
+            text-align: center;
+        }
+        .items-count-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Product Detail Modal */
+        .product-detail-modal .modal-content {
+            border-radius: 0;
+            border: none;
+            border-top: 3px solid var(--primary-color);
+        }
+        .product-detail-modal .modal-header {
+            background: var(--primary-color);
+            color: white;
+            border-bottom: none;
+            padding: 25px;
+        }
+        .product-detail-modal .modal-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .product-detail-modal .modal-body {
+            padding: 30px;
+        }
+        .product-detail-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+        }
+        .product-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .product-info-label {
+            font-weight: 600;
+            color: #555;
+            min-width: 120px;
+        }
+        .product-info-value {
+            color: var(--text-dark);
+            font-weight: 500;
+            text-align: right;
+            flex: 1;
+        }
+        .seller-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 3px solid var(--primary-color);
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 60px 0;
+            }
+            .stats-card {
+                padding: 20px;
+            }
+            .profile-section {
+                padding: 30px 20px;
+            }
+            .fullscreen-title {
+                font-size: 1.4rem;
+            }
+            .fullscreen-filters .row > div {
+                margin-bottom: 15px;
+            }
+            .product-detail-modal .modal-body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar (Modified for Dashboard) -->
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom fixed-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" onclick="showDashboardHome()">
+            <span style="font-weight: 300;">CARE</span> <strong>&</strong> <span style="font-weight: 300;">SHARE</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" onclick="showDashboardHome()">
+                    <i class="fa-solid fa-house"></i> Dashboard Home
+                </a>
+                <a class="nav-link" onclick="showSection('actions')">
+                    <i class="fa-solid fa-hands-helping"></i> My Actions
+                </a>
+                <a class="nav-link" onclick="showSection('items')">
+                    <i class="fa-solid fa-list"></i> My Items
+                </a>
+                <a class="nav-link" onclick="showAvailableItemsFullscreen()">
+                    <i class="fa-solid fa-grid"></i> Available Items
+                </a>
+                <a class="nav-link" onclick="showSection('activity')">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Activity
+                </a>
+
+                <!-- User Dropdown -->
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user"></i>
+                        <span id="userName" th:text="${user?.firstName}">User</span>
+                        <span id="adminBadge" class="admin-badge" style="display: none;">ADMIN</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" onclick="showProfile()">
+                            <i class="fa-solid fa-id-card me-2"></i>My Profile
+                        </a></li>
+                        <li><a class="dropdown-item" onclick="showDashboardHome()">
+                            <i class="fa-solid fa-chart-line me-2"></i>Dashboard Home
+                        </a></li>
+                        <!-- Admin Link - Only show if user is admin -->
+                        <li id="adminLink" style="display: none;">
+                            <a class="dropdown-item" href="/admin">
+                                <i class="fa-solid fa-shield-halved me-2"></i>Admin Panel
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" onclick="logout()">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container text-center">
+        <h1 id="dashboardTitle" style="color: white; text-transform: uppercase; letter-spacing: 2px;">Welcome to Your Dashboard</h1>
+        <p class="lead" id="dashboardSubtitle" style="color: rgba(255,255,255,0.9);">Manage your donations, exchanges, and resell activities in one place</p>
+    </div>
+</div>
+
+<!-- Dashboard Content -->
+<div class="container">
+    <!-- Dashboard Home Section (Default) -->
+    <div id="dashboardHome" class="dashboard-section active">
+        <!-- Quick Stats -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                    </div>
+                    <div class="stats-number" id="donationsCount">0</div>
+                    <div class="stats-label">Items Donated</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fa-solid fa-right-left"></i>
+                    </div>
+                    <div class="stats-number" id="exchangesCount">0</div>
+                    <div class="stats-label">Items Exchanged</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fa-solid fa-tag"></i>
+                    </div>
+                    <div class="stats-number" id="salesCount">0</div>
+                    <div class="stats-label">Items Sold</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <div class="stats-number" id="rating">4.8</div>
+                    <div class="stats-label">Your Rating</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="profile-section">
+                    <h3>Recent Activities</h3>
+                    <p class="text-muted">You haven't performed any activities yet.</p>
+                    <div class="alert alert-info">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        Start by donating, exchanging, or reselling items to see your activities here.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="quick-actions">
+                    <h4>Quick Actions</h4>
+                    <a class="action-btn" onclick="showSection('items')">
+                        <i class="fa-solid fa-plus me-2"></i><span>Add New Item</span>
+                    </a>
+                    <a class="action-btn" onclick="showSection('actions')">
+                        <i class="fa-solid fa-hand-holding-heart me-2"></i><span>Donate Items</span>
+                    </a>
+                    <a class="action-btn" onclick="showExchangeItemsFullscreen()">
+                        <i class="fa-solid fa-right-left me-2"></i><span>Exchange Items</span>
+                    </a>
+                    <a class="action-btn" onclick="showResellItemsFullscreen()">
+                        <i class="fa-solid fa-tag me-2"></i><span>Resell Items</span>
+                    </a>
+                </div>
+
+                <div class="profile-section">
+                    <h4>Community Impact</h4>
+                    <div class="info-item">
+                        <span class="info-label">Carbon Saved:</span>
+                        <span class="info-value">0 kg</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Items Saved:</span>
+                        <span class="info-value">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">People Helped:</span>
+                        <span class="info-value">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Section -->
+    <div id="profileSection" class="dashboard-section profile-section">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <h2>My Profile</h2>
+            <p class="text-muted">Manage your personal information</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="profile-info">
+                    <h4>Personal Information</h4>
+                    <div class="info-item">
+                        <span class="info-label">First Name:</span>
+                        <span class="info-value" id="profileFirstName" th:text="${user?.firstName}">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Name:</span>
+                        <span class="info-value" id="profileLastName" th:text="${user?.lastName}">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value" id="profileEmail" th:text="${user?.email}">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">User ID:</span>
+                        <span class="info-value" id="profileId" th:text="${user?.id}">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Member Since:</span>
+                        <span class="info-value" id="memberSince">2025</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="profile-info">
+                    <h4>Account Status</h4>
+                    <div class="info-item">
+                        <span class="info-label">Account Type:</span>
+                        <span class="info-value">
+                            <span id="accountTypeBadge" class="badge bg-success">Verified Member</span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email Verified:</span>
+                        <span class="info-value badge bg-success">Verified</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Community Rating:</span>
+                        <span class="info-value">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star-half-alt text-warning"></i>
+                            4.8/5.0
+                        </span>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h5>Quick Actions</h5>
+                    <a class="action-btn">
+                        <i class="fa-solid fa-pencil me-2"></i><span>Edit Profile</span>
+                    </a>
+                    <a class="action-btn">
+                        <i class="fa-solid fa-lock me-2"></i><span>Change Password</span>
+                    </a>
+                    <a class="action-btn">
+                        <i class="fa-solid fa-bell me-2"></i><span>Notification Settings</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Actions Section -->
+    <div id="actionsSection" class="dashboard-section">
+        <div class="profile-section">
+            <h2>My Actions</h2>
+            <p class="text-muted">Manage your donations, exchanges, and sales</p>
+
+            <div class="alert alert-info">
+                <i class="fa-solid fa-info-circle me-2"></i>
+                This section will show your ongoing and completed actions.
+            </div>
+        </div>
+    </div>
+
+    <!-- My Items Section -->
+    <div id="itemsSection" class="dashboard-section">
+        <div class="profile-section">
+            <h2>My Items</h2>
+            <p class="text-muted">Manage items you've listed for donation, exchange, or resale</p>
+
+            <!-- Add Product Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fa-solid fa-plus me-2"></i>Add New Product</h5>
+                </div>
+                <div class="card-body">
+                    <form id="addProductForm" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="productName" class="form-label">Product Name *</label>
+                                    <input type="text" class="form-control" id="productName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productPrice" class="form-label">Price (₹) *</label>
+                                    <input type="number" class="form-control" id="productPrice" step="0.01" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productCategory" class="form-label">Category *</label>
+                                    <select class="form-select" id="productCategory" required>
+                                        <option value="">Select Category</option>
+                                        <option value="old">Old</option>
+                                        <option value="new">New</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="productType" class="form-label">Listing Type *</label>
+                                    <select class="form-select" id="productType" required>
+                                        <option value="">Select Type</option>
+                                        <option value="Donate">Donate</option>
+                                        <option value="Exchange">Exchange</option>
+                                        <option value="Resell">Resell</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productImage" class="form-label">Product Image *</label>
+                                    <input type="file" class="form-control" id="productImage" accept="image/*" required>
+                                    <div class="form-text">Upload a clear image of your product</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="productDescription" rows="3" placeholder="Describe your product..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-paper-plane me-2"></i>Submit Product
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- My Products List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fa-solid fa-list me-2"></i>My Products</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary active" onclick="filterProducts('all')">All</button>
+                            <button type="button" class="btn btn-outline-warning" onclick="filterProducts('PENDING')">Pending</button>
+                            <button type="button" class="btn btn-outline-success" onclick="filterProducts('APPROVED')">Approved</button>
+                            <button type="button" class="btn btn-outline-danger" onclick="filterProducts('REJECTED')">Rejected</button>
+                        </div>
+                    </div>
+                    <div id="productsList" class="row">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Section -->
+    <div id="activitySection" class="dashboard-section">
+        <div class="profile-section">
+            <h2>Activity History</h2>
+            <p class="text-muted">View your complete activity timeline</p>
+
+            <div class="alert alert-info">
+                <i class="fa-solid fa-info-circle me-2"></i>
+                This section will show your complete activity timeline.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Available Items Section -->
+<div id="fullscreenAvailableItems" class="fullscreen-available-items">
+    <div class="fullscreen-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="fullscreen-title">Available Items Marketplace</h1>
+                </div>
+                <div class="col-auto">
+                    <button class="close-fullscreen" onclick="closeFullscreenAvailableItems()">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-content">
+        <div class="container">
+            <!-- Enhanced Filter Controls -->
+            <div class="fullscreen-filters">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label for="fullscreenItemTypeFilter" class="form-label">Item Type</label>
+                        <select class="form-select" id="fullscreenItemTypeFilter" onchange="filterFullscreenAvailableItems()">
+                            <option value="all">All Types</option>
+                            <option value="Donate">Donate</option>
+                            <option value="Exchange">Exchange</option>
+                            <option value="Resell">Resell</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fullscreenCategoryFilter" class="form-label">Category</label>
+                        <select class="form-select" id="fullscreenCategoryFilter" onchange="filterFullscreenAvailableItems()">
+                            <option value="all">All Categories</option>
+                            <option value="old">Old</option>
+                            <option value="new">New</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fullscreenSortFilter" class="form-label">Sort By</label>
+                        <select class="form-select" id="fullscreenSortFilter" onchange="filterFullscreenAvailableItems()">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="price_low">Price: Low to High</option>
+                            <option value="price_high">Price: High to Low</option>
+                            <option value="name_asc">Name: A to Z</option>
+                            <option value="name_desc">Name: Z to A</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="fullscreen-stats">
+                            <span class="items-count-badge" id="fullscreenItemsCount">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Available Items Grid -->
+            <div id="fullscreenAvailableItemsList" class="row">
+                <!-- Items will be loaded here -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-3">Loading available items...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="modal fade product-detail-modal" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productDetailModalLabel">Product Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="productDetailContent">
+                    <!-- Product details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="contactSellerFromModal()">
+                    <i class="fa-solid fa-message me-2"></i>Contact Seller
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Amazon-style footer -->
+<section class="amazon-footer">
+    <div class="container">
+        <div class="row text-start">
+            <div class="col-md-3 mb-3">
+                <h5>Get to Know Us</h5>
+                <ul>
+                    <li><a onclick="showDashboardHome()">Dashboard Home</a></li>
+                    <li><a onclick="showProfile()">My Profile</a></li>
+                    <li><a onclick="showSection('actions')">My Actions</a></li>
+                    <li><a onclick="showSection('items')">My Items</a></li>
+                    <li><a onclick="showAvailableItemsFullscreen()">Available Items</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Connect with Us</h5>
+                <ul>
+                    <li><a href="#" target="_blank">Facebook</a></li>
+                    <li><a href="#" target="_blank">Twitter</a></li>
+                    <li><a href="#" target="_blank">Instagram</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Make a Difference</h5>
+                <ul>
+                    <li><a onclick="showSection('actions')">Start Donating</a></li>
+                    <li><a onclick="showSection('actions')">Exchange Items</a></li>
+                    <li><a onclick="showSection('actions')">Resell Items</a></li>
+                    <li><a onclick="showAvailableItemsFullscreen()">Browse All Items</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Let Us Help You</h5>
+                <ul>
+                    <li><a onclick="showProfile()">Your Account</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Safety Tips</a></li>
+                    <li><a href="#">Contact Support</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Original Footer -->
+<footer class="text-center">
+    <div class="container">
+        <p>© 2025 Care & Share. All rights reserved.</p>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Global variable to store current product details
+    let currentProductDetails = null;
+
+    // Function to show dashboard home
+    function showDashboardHome() {
+        // First, close fullscreen if it's open
+        if (document.body.classList.contains('fullscreen-available')) {
+            closeFullscreenAvailableItems();
+            return; // Let closeFullscreenAvailableItems handle the navigation
+        }
+
+        hideAllSections();
+        document.getElementById('dashboardHome').classList.add('active');
+        updateNavActiveState('dashboardHome');
+        updateDashboardHeader('Welcome to Your Dashboard', 'Manage your donations, exchanges, and resell activities in one place');
+    }
+
+    // Function to show profile section
+    function showProfile() {
+        // First, close fullscreen if it's open
+        if (document.body.classList.contains('fullscreen-available')) {
+            closeFullscreenAvailableItems();
+            return;
+        }
+
+        hideAllSections();
+        document.getElementById('profileSection').classList.add('active');
+        updateNavActiveState('profile');
+        updateDashboardHeader('My Profile', 'Manage your personal information and account settings');
+        updateProfileData();
+    }
+
+    function showExchangeItemsFullscreen() {
+  hideAllSections();
+  document.body.classList.add('fullscreen-available');
+  document.getElementById('fullscreenAvailableItems').classList.add('active');
+  updateNavActiveState('available');
+
+  // Load only Exchange type items
+  loadFullscreenAvailableItems('Exchange', 'all', 'newest');
+   // Update the title
+  document.querySelector('.fullscreen-title').textContent = 'Exchange Marketplace';
+}
+
+
+function showResellItemsFullscreen() {
+  hideAllSections();
+  document.body.classList.add('fullscreen-available');
+  document.getElementById('fullscreenAvailableItems').classList.add('active');
+  updateNavActiveState('available');
+
+  // Load only Resell type items
+  loadFullscreenAvailableItems('Resell', 'all', 'newest');
+
+  // Update the title
+  document.querySelector('.fullscreen-title').textContent = 'Resell Marketplace';
+}
+
+<!--   async function updateItemTypeCounts() {-->
+<!--  const token = localStorage.getItem('jwtToken');-->
+<!--  if (!token) return;-->
+
+<!--  try {-->
+<!--    const response = await fetch('/api/products/my-products', {-->
+<!--      method: 'GET',-->
+<!--      headers: {-->
+<!--        'Authorization': 'Bearer ' + token,-->
+<!--        'Content-Type': 'application/json'-->
+<!--      }-->
+<!--    });-->
+
+<!--    if (!response.ok)-->
+<!--      throw new Error('Failed to load items for count');-->
+
+
+<!--    const products = await response.json();-->
+
+<!--    // Count by type-->
+
+<!--    // ✅ count only APPROVED items-->
+<!--    const approvedProducts = products.filter(p => p.status === 'APPROVED');-->
+
+<!--    const donateCount = products.filter(p => p.type === 'Donate').length;-->
+<!--    const exchangeCount = products.filter(p => p.type === 'Exchange').length;-->
+<!--    const resellCount = products.filter(p => p.type === 'Resell').length;-->
+
+<!--    // Update UI-->
+<!--    document.getElementById('donationsCount').textContent = donateCount;-->
+<!--    document.getElementById('exchangesCount').textContent = exchangeCount;-->
+<!--    document.getElementById('salesCount').textContent = resellCount;-->
+
+<!--  } catch (error) {-->
+<!--    console.error('Error updating item counts:', error);-->
+<!--  }-->
+<!--}-->
+     async function updateItemTypeCounts() {
+  const token = localStorage.getItem('jwtToken');
+  if (!token) return;
+
+  try {
+    // Get all available Donate items
+    const donateResponse = await fetch('/api/products/available?type=Donate', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const donateItems = await donateResponse.json();
+
+    // Get all available Exchange items
+    const exchangeResponse = await fetch('/api/products/available?type=Exchange', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const exchangeItems = await exchangeResponse.json();
+
+    // Get all available Resell items
+    const resellResponse = await fetch('/api/products/available?type=Resell', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const resellItems = await resellResponse.json();
+
+    // ✅ Now update counts in the dashboard
+    document.getElementById('donationsCount').textContent = donateItems.length;
+    document.getElementById('exchangesCount').textContent = exchangeItems.length;
+    document.getElementById('salesCount').textContent = resellItems.length;
+
+  } catch (error) {
+    console.error('Error updating item counts:', error);
+  }
+}
+
+    // Function to show different sections
+    function showSection(section) {
+        // First, close fullscreen if it's open
+        if (document.body.classList.contains('fullscreen-available')) {
+            closeFullscreenAvailableItems();
+            return;
+        }
+
+        hideAllSections();
+
+        switch(section) {
+            case 'actions':
+                document.getElementById('actionsSection').classList.add('active');
+                updateNavActiveState('actions');
+                updateDashboardHeader('My Actions', 'Manage your donations, exchanges, and sales');
+                break;
+            case 'items':
+                document.getElementById('itemsSection').classList.add('active');
+                updateNavActiveState('items');
+                updateDashboardHeader('My Items', 'Manage items you\'ve listed for donation, exchange, or resale');
+                loadMyProducts();
+                break;
+            case 'activity':
+                document.getElementById('activitySection').classList.add('active');
+                updateNavActiveState('activity');
+                updateDashboardHeader('Activity History', 'View your complete activity timeline');
+                break;
+        }
+    }
+
+    // Function to show fullscreen available items
+    function showAvailableItemsFullscreen() {
+        // First hide all regular sections
+        hideAllSections();
+
+        document.body.classList.add('fullscreen-available');
+        document.getElementById('fullscreenAvailableItems').classList.add('active');
+        updateNavActiveState('available');
+        loadFullscreenAvailableItems();
+    }
+
+    // Function to close fullscreen available items
+    function closeFullscreenAvailableItems() {
+        document.body.classList.remove('fullscreen-available');
+        document.getElementById('fullscreenAvailableItems').classList.remove('active');
+        // Return to dashboard home when closing fullscreen
+        showDashboardHome();
+    }
+
+    // Function to hide all sections
+    function hideAllSections() {
+        const sections = document.querySelectorAll('.dashboard-section');
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+    }
+
+    // Product Management Functions
+    function submitProductForm(event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        formData.append('name', document.getElementById('productName').value);
+        formData.append('price', document.getElementById('productPrice').value);
+        formData.append('category', document.getElementById('productCategory').value);
+        formData.append('type', document.getElementById('productType').value);
+        formData.append('description', document.getElementById('productDescription').value);
+        formData.append('image', document.getElementById('productImage').files[0]);
+
+        const token = localStorage.getItem('jwtToken');
+
+        fetch('/api/products/add', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                document.getElementById('addProductForm').reset();
+                loadMyProducts();
+                updateItemTypeCounts();
+            } else {
+                alert('Error: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error submitting product');
+        });
+    }
+
+    function loadMyProducts(status = 'all') {
+        const token = localStorage.getItem('jwtToken');
+        let url = '/api/products/my-products';
+
+        if (status !== 'all') {
+            url = `/api/products/my-products/${status}`;
+        }
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch products');
+            }
+            return response.json();
+        })
+        .then(products => {
+            displayProducts(products);
+        })
+        .catch(error => {
+            console.error('Error loading products:', error);
+            const container = document.getElementById('productsList');
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="fa-solid fa-exclamation-triangle fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Failed to load products</p>
+                    <button class="btn btn-primary mt-3" onclick="loadMyProducts()">
+                        <i class="fa-solid fa-refresh me-2"></i>Try Again
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    function displayProducts(products) {
+        const container = document.getElementById('productsList');
+
+        if (products.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No products found</p>
+                    <p class="text-muted small">You haven't listed any products yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = products.map(product => `
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <img src="${product.imagePath || 'https://via.placeholder.com/300x200?text=No+Image'}"
+                         class="card-img-top" alt="${product.name}"
+                         style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">${product.name}</h5>
+                        <p class="card-text">${product.description || 'No description available'}</p>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-secondary">${product.category}</span>
+                            <span class="badge bg-info">${product.type}</span>
+                        </div>
+                        <p class="card-text"><strong>Price: ₹${product.price}</strong></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge ${getStatusBadgeClass(product.status)}">
+                                ${product.status}
+                            </span>
+                            <small class="text-muted">
+                                ${product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'Unknown date'}
+                            </small>
+                        </div>
+                        ${product.status === 'REJECTED' && product.rejectionReason ? `
+                            <div class="mt-2">
+                                <small class="text-danger"><strong>Reason: </strong>${product.rejectionReason}</small>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function getStatusBadgeClass(status) {
+        switch(status) {
+            case 'PENDING': return 'bg-warning';
+            case 'APPROVED': return 'bg-success';
+            case 'REJECTED': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+
+    function filterProducts(status) {
+        // Update active button
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        loadMyProducts(status);
+    }
+
+    // Fullscreen Available Items Functions
+    function loadFullscreenAvailableItems(type = 'all', category = 'all', sort = 'newest') {
+        const token = localStorage.getItem('jwtToken');
+        let url = '/api/products/available';
+
+        const params = new URLSearchParams();
+        if (type !== 'all') params.append('type', type);
+        if (category !== 'all') params.append('category', category);
+        if (sort !== 'newest') params.append('sort', sort);
+
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch available products');
+            }
+            return response.json();
+        })
+        .then(products => {
+            // Apply client-side sorting as fallback
+            const sortedProducts = sortProducts(products, sort);
+            displayFullscreenAvailableItems(sortedProducts);
+        })
+        .catch(error => {
+            console.error('Error loading available items:', error);
+            document.getElementById('fullscreenAvailableItemsList').innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="fa-solid fa-exclamation-triangle fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">Failed to load items. Please try again.</p>
+                    <button class="btn btn-primary mt-3" onclick="loadFullscreenAvailableItems()">
+                        <i class="fa-solid fa-refresh me-2"></i>Retry
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    // Client-side sorting function (as fallback)
+    function sortProducts(products, sortType) {
+        const sortedProducts = [...products];
+
+        switch(sortType) {
+            case 'newest':
+                return sortedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            case 'oldest':
+                return sortedProducts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            case 'price_low':
+                return sortedProducts.sort((a, b) => a.price - b.price);
+            case 'price_high':
+                return sortedProducts.sort((a, b) => b.price - a.price);
+            case 'name_asc':
+                return sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
+            case 'name_desc':
+                return sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
+            default:
+                return sortedProducts;
+        }
+    }
+
+<!--    function displayFullscreenAvailableItems(products) {-->
+<!--        const container = document.getElementById('fullscreenAvailableItemsList');-->
+<!--        const countElement = document.getElementById('fullscreenItemsCount');-->
+
+<!--        if (products.length === 0) {-->
+<!--            container.innerHTML = `-->
+<!--                <div class="col-12 text-center py-5">-->
+<!--                    <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>-->
+<!--                    <p class="text-muted">No available items found</p>-->
+<!--                    <p class="text-muted small">Check back later for new items or try different filters</p>-->
+<!--                </div>-->
+<!--            `;-->
+<!--            countElement.textContent = '0 items';-->
+<!--            return;-->
+<!--        }-->
+
+<!--        countElement.textContent = `${products.length} items`;-->
+
+<!--        container.innerHTML = products.map(product => `-->
+<!--            <div class="col-md-6 col-lg-4 col-xl-3 mb-4">-->
+<!--                <div class="card h-100 product-card">-->
+<!--                    <div class="position-relative">-->
+<!--                        <img src="${product.imagePath || 'https://via.placeholder.com/300x200?text=No+Image'}"-->
+<!--                             class="card-img-top" alt="${product.name}"-->
+<!--                             style="height: 200px; object-fit: cover;">-->
+<!--                        <span class="position-absolute top-0 end-0 m-2 badge ${getTypeBadgeClass(product.type)}">-->
+<!--                            ${product.type}-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                    <div class="card-body d-flex flex-column">-->
+<!--                        <h5 class="card-title">${product.name}</h5>-->
+<!--                        <p class="card-text flex-grow-1">${product.description || 'No description available'}</p>-->
+
+<!--                        <div class="mt-auto">-->
+<!--                            <div class="d-flex justify-content-between align-items-center mb-2">-->
+<!--                                <span class="badge bg-secondary">${product.category}</span>-->
+<!--                                <span class="text-primary fw-bold">₹${product.price}</span>-->
+<!--                            </div>-->
+
+<!--                            <div class="d-flex justify-content-between align-items-center mb-3">-->
+<!--                                <small class="text-muted">-->
+<!--                                    <i class="fa-solid fa-user me-1"></i>-->
+<!--                                    ${product.user ? (product.user.firstName || 'User') : 'User'}-->
+<!--                                </small>-->
+<!--                                <small class="text-muted">-->
+<!--                                    ${product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'Unknown date'}-->
+<!--                                </small>-->
+<!--                            </div>-->
+
+<!--                            <div class="d-grid gap-2">-->
+<!--                                <button class="btn btn-outline-primary btn-sm" onclick="viewItemDetails(${product.id})">-->
+<!--                                    <i class="fa-solid fa-eye me-1"></i> View Details-->
+<!--                                </button>-->
+<!--                                <button class="btn btn-primary btn-sm" onclick="contactSeller(${product.id})">-->
+<!--                                    <i class="fa-solid fa-message me-1"></i> Contact Seller-->
+<!--                                </button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        `).join('');-->
+<!--    }-->
+
+function displayFullscreenAvailableItems(products) {
+  const container = document.getElementById('fullscreenAvailableItemsList');
+  const countElement = document.getElementById('fullscreenItemsCount');
+
+  if (products.length === 0) {
+    container.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
+        <p class="text-muted">No available items found</p>
+      </div>`;
+    countElement.textContent = '0 items';
+    return;
+  }
+
+  countElement.textContent = `${products.length} items`;
+
+  container.innerHTML = products.map(product => {
+    const isResell = product.type === 'Resell';
+    const actionBtn = isResell
+      ? `<button class="btn btn-success btn-sm" onclick="placeOrder(${product.id})">
+           <i class='fa-solid fa-cart-shopping me-1'></i> Buy Now
+         </button>`
+      : `<button class="btn btn-primary btn-sm" onclick="contactSeller(${product.id})">
+           <i class='fa-solid fa-message me-1'></i> Contact Seller
+         </button>`;
+
+    return `
+      <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+        <div class="card h-100 product-card">
+          <div class="position-relative">
+            <img src="${product.imagePath || 'https://via.placeholder.com/300x200?text=No+Image'}"
+                 class="card-img-top" alt="${product.name}"
+                 style="height: 200px; object-fit: cover;">
+            <span class="position-absolute top-0 end-0 m-2 badge ${getTypeBadgeClass(product.type)}">
+              ${product.type}
+            </span>
+          </div>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${product.name}</h5>
+            <p class="card-text flex-grow-1">${product.description || 'No description available'}</p>
+            <div class="mt-auto">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-secondary">${product.category}</span>
+                <span class="text-primary fw-bold">₹${product.price}</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <small class="text-muted">
+                  <i class="fa-solid fa-user me-1"></i>
+                  ${product.user ? (product.user.firstName || 'User') : 'User'}
+                </small>
+                <small class="text-muted">
+                  ${product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'Unknown date'}
+                </small>
+              </div>
+              <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary btn-sm" onclick="viewItemDetails(${product.id})">
+                  <i class="fa-solid fa-eye me-1"></i> View Details
+                </button>
+                ${actionBtn}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+ }
+
+
+    function getTypeBadgeClass(type) {
+        switch(type) {
+            case 'Donate': return 'bg-success';
+            case 'Exchange': return 'bg-warning';
+            case 'Resell': return 'bg-info';
+            default: return 'bg-secondary';
+        }
+    }
+
+    function filterFullscreenAvailableItems() {
+        const type = document.getElementById('fullscreenItemTypeFilter').value;
+        const category = document.getElementById('fullscreenCategoryFilter').value;
+        const sort = document.getElementById('fullscreenSortFilter').value;
+
+        loadFullscreenAvailableItems(type, category, sort);
+    }
+
+    // Function to show item details in a modal
+    function viewItemDetails(productId) {
+        const token = localStorage.getItem('jwtToken');
+
+        // Show loading state
+        document.getElementById('productDetailContent').innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-muted mt-3">Loading product details...</p>
+            </div>
+        `;
+
+        // Create modal instance
+        const productModal = new bootstrap.Modal(document.getElementById('productDetailModal'));
+        productModal.show();
+
+        // Fetch product details from your actual database
+        fetch(`/api/products/${productId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Product not found');
+            }
+            return response.json();
+        })
+        .then(product => {
+            currentProductDetails = product;
+            displayProductDetails(product);
+        })
+        .catch(error => {
+            console.error('Error loading product details:', error);
+            document.getElementById('productDetailContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    Failed to load product details. Please try again.
+                </div>
+            `;
+        });
+    }
+
+    // Function to display product details in modal
+    function displayProductDetails(product) {
+        const modalContent = document.getElementById('productDetailContent');
+
+        modalContent.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <img src="${product.imagePath || 'https://via.placeholder.com/400x300?text=No+Image'}"
+                         class="product-detail-image w-100" alt="${product.name}">
+                </div>
+                <div class="col-md-6">
+                    <h4 class="text-primary mb-3">${product.name}</h4>
+                    <p class="text-muted mb-4">${product.description || 'No description available'}</p>
+
+                    <div class="product-info-list">
+                        <div class="product-info-item">
+                            <span class="product-info-label">Price:</span>
+                            <span class="product-info-value text-primary fw-bold">₹${product.price}</span>
+                        </div>
+                        <div class="product-info-item">
+                            <span class="product-info-label">Type:</span>
+                            <span class="product-info-value">
+                                <span class="badge ${getTypeBadgeClass(product.type)}">${product.type}</span>
+                            </span>
+                        </div>
+                        <div class="product-info-item">
+                            <span class="product-info-label">Category:</span>
+                            <span class="product-info-value">
+                                <span class="badge bg-secondary">${product.category}</span>
+                            </span>
+                        </div>
+                        <div class="product-info-item">
+                            <span class="product-info-label">Status:</span>
+                            <span class="product-info-value">
+                                <span class="badge ${getStatusBadgeClass(product.status)}">${product.status}</span>
+                            </span>
+                        </div>
+                        <div class="product-info-item">
+                            <span class="product-info-label">Listed On:</span>
+                            <span class="product-info-value">
+                                ${product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'Unknown date'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="seller-info">
+                        <h6 class="mb-3"><i class="fa-solid fa-user me-2"></i>Seller Information</h6>
+                        <div class="product-info-item">
+                            <span class="product-info-label">Name:</span>
+                            <span class="product-info-value">
+                                ${product.user ? (product.user.firstName + ' ' + (product.user.lastName || '')) : 'Unknown User'}
+                            </span>
+                        </div>
+                        <div class="product-info-item">
+                            <span class="product-info-label">Email:</span>
+                            <span class="product-info-value">
+                                ${product.user ? product.user.email : 'Not available'}
+                            </span>
+                        </div>
+                        <div class="product-info-item">
+                            <span class="product-info-label">Member Since:</span>
+                            <span class="product-info-value">
+                                ${product.user && product.user.createdAt ? new Date(product.user.createdAt).getFullYear() : '2024'}
+                            </span>
+                        </div>
+                        <div class="product-info-item">
+                            <span class="product-info-label">Rating:</span>
+                            <span class="product-info-value">
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star-half-alt text-warning"></i>
+                                4.8/5.0
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Update modal title
+        document.getElementById('productDetailModalLabel').textContent = product.name;
+    }
+
+
+    async function placeOrder(productId) {
+  try {
+    const response = await fetch(`/api/resale/order/${productId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+         "Authorization": "Bearer " + localStorage.getItem("jwtToken")
+      }
+    });
+
+<!--    const data = await response.json();-->
+      let data = null;
+      let text = await response.text();
+<!--    // Only parse JSON if body exists-->
+<!--    const text = await response.text();-->
+         if (text && text.trim() !== "") {
+      try {
+        data = JSON.parse(text);
+      } catch {
+<!--        // not valid JSON, ignore-->
+        data = null;
+      }
+    }
+<!--    if (response.ok) {-->
+<!--      alert(`✅ Order placed successfully for product: ${data.order?.productName || productId}`);-->
+<!--      loadMyOrders(); // refresh user's orders-->
+<!--    } else {-->
+<!--      alert(`❌ ${data.error || data.message || "Failed to place order"}`);-->
+<!--    }-->
+
+         if (response.ok) {
+      alert(`✅ Order placed successfully for product ID: ${productId}`);
+      if (typeof loadMyOrders === "function") loadMyOrders();
+    } else {
+      const errorMsg =
+        (data && (data.error || data.message)) ||
+        text ||
+        "Failed to place order.";
+      alert(`❌ ${errorMsg}`);
+    }
+  } catch (error) {
+    alert("Error placing order: " + error);
+  }
+}
+
+    function contactSeller(productId) {
+        // You can implement a messaging system here
+        alert(`Contact seller for product ID: ${productId}\n\nThis feature will open a chat with the seller.`);
+    }
+
+    function contactSellerFromModal() {
+        if (currentProductDetails) {
+            contactSeller(currentProductDetails.id);
+        }
+    }
+
+    // Initialize product form
+    document.addEventListener('DOMContentLoaded', function() {
+        const productForm = document.getElementById('addProductForm');
+        if (productForm) {
+            productForm.addEventListener('submit', submitProductForm);
+        }
+
+        // Load products when items section is shown
+        const originalShowSection = window.showSection;
+        window.showSection = function(section) {
+            originalShowSection(section);
+            if (section === 'items') {
+                loadMyProducts();
+            }
+        };
+    });
+
+    // Function to update active nav state
+    function updateNavActiveState(activeSection) {
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+
+        switch(activeSection) {
+            case 'dashboardHome':
+                navLinks[0].classList.add('active');
+                break;
+            case 'actions':
+                navLinks[1].classList.add('active');
+                break;
+            case 'items':
+                navLinks[2].classList.add('active');
+                break;
+            case 'available':
+                navLinks[3].classList.add('active');
+                break;
+            case 'activity':
+                navLinks[4].classList.add('active');
+                break;
+            case 'profile':
+                break;
+        }
+    }
+
+    // Function to update dashboard header
+    function updateDashboardHeader(title, subtitle) {
+        document.getElementById('dashboardTitle').textContent = title;
+        document.getElementById('dashboardSubtitle').textContent = subtitle;
+    }
+
+    // Function to update profile data and check admin status
+    function updateProfileData() {
+        const token = localStorage.getItem('jwtToken');
+        if (token) {
+            fetch('/api/user/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+                return response.json();
+            })
+            .then(user => {
+                document.getElementById('profileFirstName').textContent = user.firstName || 'N/A';
+                document.getElementById('profileLastName').textContent = user.lastName || 'N/A';
+                document.getElementById('profileEmail').textContent = user.email || 'N/A';
+                document.getElementById('profileId').textContent = user.id || 'N/A';
+                document.getElementById('userName').textContent = user.firstName || 'User';
+
+                if (user.admin) {
+                    document.getElementById('adminBadge').style.display = 'inline';
+                    document.getElementById('adminLink').style.display = 'block';
+                    document.getElementById('accountTypeBadge').className = 'badge bg-danger';
+                    document.getElementById('accountTypeBadge').textContent = 'Administrator';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+        }
+    }
+
+    // Logout function
+    function logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(() => {
+                localStorage.removeItem('jwtToken');
+                window.location.href = '/';
+            })
+            .catch(error => {
+                console.error('Logout error:', error);
+                localStorage.removeItem('jwtToken');
+                window.location.href = '/';
+            });
+        }
+    }
+
+    // Initialize dashboard stats
+    function initializeStats() {
+        // You can add actual API calls here to get real stats
+        document.getElementById('donationsCount').textContent = '0';
+        document.getElementById('exchangesCount').textContent = '0';
+        document.getElementById('salesCount').textContent = '0';
+        document.getElementById('rating').textContent = '4.8';
+    }
+
+    // Check authentication on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // Initialize the page
+        initializeStats();
+        updateProfileData();
+        updateItemTypeCounts();
+
+        // Show dashboard home by default
+        showDashboardHome();
+    });
+
+    // Prevent default behavior for all internal links
+    document.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A' && e.target.getAttribute('href') === '#') {
+            e.preventDefault();
+        }
+    });
+
+    // Close fullscreen when pressing Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.body.classList.contains('fullscreen-available')) {
+            closeFullscreenAvailableItems();
+        }
+    });
+</script>
+</body>
+</html>
